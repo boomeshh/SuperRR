@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090b14">
+  <title>RR | Pressure Performance Engine</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    :root { --pink:#ec1687; --ink:#090b14; --card:#111522; --line:#252b3b; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:#f8fafc; background:radial-gradient(circle at 8% 0%,#24112b 0,transparent 32rem),radial-gradient(circle at 100% 20%,#101e3b 0,transparent 28rem),var(--ink); font-family:Inter,ui-sans-serif,system-ui,sans-serif; }
+    .glass { background:rgba(17,21,34,.76); border:1px solid rgba(148,163,184,.16); box-shadow:0 24px 70px rgba(0,0,0,.24); backdrop-filter:blur(18px); }
+    .card { background:linear-gradient(145deg,rgba(20,25,40,.94),rgba(12,16,27,.94)); border:1px solid var(--line); }
+    .card:hover { border-color:rgba(236,22,135,.38); }
+    .pink-glow { box-shadow:0 0 25px rgba(236,22,135,.18); }
+    .mono { font-family:"JetBrains Mono","SFMono-Regular",Consolas,monospace; }
+    .scrollbar::-webkit-scrollbar { width:7px; height:7px; }
+    .scrollbar::-webkit-scrollbar-thumb { background:#394155; border-radius:999px; }
+    .scrollbar::-webkit-scrollbar-track { background:transparent; }
+    .drawer { transform:translateX(105%); transition:transform .28s ease; }
+    .drawer.open { transform:translateX(0); }
+    .backdrop { opacity:0; pointer-events:none; transition:opacity .28s ease; }
+    .backdrop.open { opacity:1; pointer-events:auto; }
+    @keyframes pulse-pink { 0%,100%{box-shadow:0 0 0 0 rgba(236,22,135,.35)} 50%{box-shadow:0 0 0 7px rgba(236,22,135,0)} }
+    .rank-one { animation:pulse-pink 2.4s infinite; }
+  </style>
+</head>
+<body>
+  <div class="mx-auto max-w-[1500px] px-4 py-5 sm:px-6 lg:px-8">
+    <header class="glass sticky top-3 z-20 mb-6 rounded-2xl px-5 py-4 sm:px-7">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <div class="mb-2 flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[.18em]">
+            <span class="rounded-full border border-pink-400/30 bg-pink-500/10 px-3 py-1 text-pink-300">SupeRR Selector · S2</span>
+            <span class="rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-sky-300">2022—2026 data cut</span>
+            <span class="flex items-center gap-1.5 text-emerald-300"><i class="h-1.5 w-1.5 rounded-full bg-emerald-400"></i> Model validated</span>
+          </div>
+          <h1 class="text-2xl font-black tracking-tight sm:text-4xl">Pressure Performance Engine</h1>
+          <p class="mt-1 text-sm text-slate-400">Bayesian player intelligence for Rajasthan Royals’ 2027 auction room.</p>
+        </div>
+        <div class="text-left lg:text-right">
+          <div class="text-[10px] uppercase tracking-[.2em] text-slate-500">Target strategy</div>
+          <div class="text-lg font-bold text-pink-300">Rajasthan Royals <span class="text-slate-500">/</span> IPL 2027</div>
+          <div class="mono mt-1 text-xs text-slate-500">PI ≥ 0.60 · minimum 120 legal balls</div>
+        </div>
+      </div>
+    </header>
+
+    <section class="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div class="card rounded-2xl p-4"><div class="text-[10px] uppercase tracking-widest text-slate-500">Deliveries analyzed</div><div class="mono mt-2 text-2xl font-bold">200,999</div><div class="mt-1 text-xs text-emerald-300">Full historical coverage</div></div>
+      <div class="card rounded-2xl p-4"><div class="text-[10px] uppercase tracking-widest text-slate-500">Pressure deliveries</div><div class="mono mt-2 text-2xl font-bold text-pink-300">24,677</div><div class="mt-1 text-xs text-slate-500">High-leverage sample</div></div>
+      <div class="card rounded-2xl p-4"><div class="text-[10px] uppercase tracking-widest text-slate-500">Eligibility floor</div><div class="mono mt-2 text-2xl font-bold text-sky-300">N ≥ 120</div><div class="mt-1 text-xs text-slate-500">Legal pressure balls</div></div>
+      <div class="card rounded-2xl p-4"><div class="text-[10px] uppercase tracking-widest text-slate-500">Shrinkage priors</div><div class="mono mt-2 text-2xl font-bold text-amber-300">K 30 / 5</div><div class="mt-1 text-xs text-slate-500">Rates / event metrics</div></div>
+    </section>
+
+    <main>
+      <div class="mb-4 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+        <div class="inline-flex w-fit rounded-xl border border-slate-800 bg-slate-950/70 p-1">
+          <button id="btn-batters" class="rounded-lg bg-pink-600 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-pink-900/30">Top 10 Batters</button>
+          <button id="btn-bowlers" class="rounded-lg px-4 py-2 text-sm font-bold text-slate-400 hover:text-white">Top 10 Bowlers</button>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="inline-flex rounded-lg border border-slate-800 bg-slate-950/70 p-1">
+            <button id="mode-bar" class="rounded-md bg-slate-700 px-3 py-1.5 text-xs font-semibold text-white">Bar comparison</button>
+            <button id="mode-scatter" class="rounded-md px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-white">Scatter quadrant</button>
+          </div>
+          <span class="hidden text-xs text-slate-500 sm:inline">Click a player for scouting detail</span>
+        </div>
+      </div>
+
+      <div class="mb-6 grid grid-cols-1 items-stretch gap-5 lg:grid-cols-3">
+        <section class="card flex min-h-[520px] flex-col rounded-2xl p-5 lg:col-span-1">
+          <div class="mb-3 flex items-start justify-between gap-3">
+            <div><h2 id="chart-title" class="font-bold">Clutch delta elevation</h2><p id="chart-sub" class="mt-1 text-xs text-slate-500">Pressure strike rate vs baseline</p></div>
+            <span class="rounded-full border border-pink-400/20 bg-pink-400/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-pink-300">PUP model</span>
+          </div>
+          <div class="relative h-64 min-h-0 sm:h-72"><canvas id="rankingChart"></canvas></div>
+          <div id="chart-insight" class="mt-4 rounded-xl border border-slate-800 bg-slate-950/55 p-3 text-xs leading-relaxed text-slate-300"></div>
+        </section>
+
+        <section class="card flex min-h-[520px] min-w-0 flex-col rounded-2xl p-5 lg:col-span-2">
+          <div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div><h2 id="table-title" class="font-bold">Top 10 ranked batters under pressure</h2><p id="table-sub" class="mt-1 text-xs text-slate-500">Ranked by Composite PUP Score</p></div>
+            <div class="flex gap-2">
+              <label class="relative"><span class="sr-only">Search players</span><input id="search" type="search" placeholder="Search player…" class="w-40 rounded-lg border border-slate-700 bg-slate-950/70 py-2 pl-3 pr-2 text-xs text-white outline-none placeholder:text-slate-600 focus:border-pink-500 sm:w-48"></label>
+              <button id="export" class="rounded-lg border border-slate-700 bg-slate-800/80 px-3 py-2 text-xs font-bold text-slate-200 hover:border-pink-500/50 hover:text-white">Export CSV</button>
+            </div>
+          </div>
+          <div class="scrollbar min-h-0 flex-1 overflow-auto rounded-xl border border-slate-800">
+            <table class="w-full min-w-[700px] text-left text-xs">
+              <thead class="sticky top-0 z-10 bg-slate-950/95 text-[10px] uppercase tracking-wider text-slate-500">
+                <tr><th class="px-3 py-3">#</th><th class="px-3 py-3">Player</th><th class="px-3 py-3">P balls</th><th id="th-pressure" class="px-3 py-3">Pressure SR</th><th id="th-base" class="px-3 py-3">Base SR</th><th class="px-3 py-3 text-pink-300">Δ impact</th><th class="px-3 py-3">Boundary %</th><th class="px-3 py-3 text-right">Score</th></tr>
+              </thead>
+              <tbody id="playerTableBody" class="divide-y divide-slate-800/70"></tbody>
+            </table>
+          </div>
+          <div id="result-count" class="mt-3 text-right text-[10px] uppercase tracking-widest text-slate-600"></div>
+        </section>
+      </div>
+
+      <section class="card rounded-2xl border-l-4 border-l-pink-500 p-5 sm:p-6">
+        <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between"><div><div class="text-[10px] font-bold uppercase tracking-[.2em] text-pink-300">Decision layer</div><h2 class="mt-1 text-xl font-black">Rajasthan Royals strategic auction fit</h2></div><div class="mono text-xs text-slate-500">Death overs · crisis recovery · leverage</div></div>
+        <div id="rr-fit-content" class="grid grid-cols-1 gap-3 md:grid-cols-2"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="drawer-backdrop" class="backdrop fixed inset-0 z-30 bg-black/70"></div>
+  <aside id="player-drawer" class="drawer scrollbar fixed right-0 top-0 z-40 h-full w-full max-w-lg overflow-y-auto border-l border-slate-700 bg-[#0d111d] p-5 shadow-2xl sm:p-7">
+    <div class="mb-8 flex items-center justify-between"><div class="text-[10px] font-bold uppercase tracking-[.2em] text-pink-300">Player intelligence brief</div><button id="close-drawer" class="rounded-lg border border-slate-700 px-3 py-1.5 text-slate-400 hover:border-pink-500/50 hover:text-white">✕</button></div>
+    <div class="flex items-start justify-between gap-4"><div><div id="drawer-role" class="mb-2 text-xs uppercase tracking-widest text-slate-500"></div><h2 id="drawer-name" class="text-3xl font-black"></h2><div id="drawer-balls" class="mono mt-2 text-xs text-slate-500"></div></div><div id="drawer-score" class="pink-glow rounded-2xl border border-pink-400/30 bg-pink-500/10 px-4 py-3 text-center"><div class="text-[10px] uppercase tracking-widest text-pink-300">PUP</div><div class="mono text-2xl font-black text-white"></div></div></div>
+    <div class="my-7 rounded-2xl border border-slate-800 bg-slate-950/60 p-4"><div class="mb-3 text-xs font-bold uppercase tracking-widest text-slate-500">Tactical breakdown</div><div id="drawer-stats" class="grid grid-cols-2 gap-3"></div></div>
+    <div class="rounded-2xl border border-pink-400/20 bg-pink-500/[.06] p-4"><div class="mb-2 text-xs font-bold uppercase tracking-widest text-pink-300">RR 2027 auction verdict</div><p id="drawer-verdict" class="text-sm leading-relaxed text-slate-300"></p></div>
+  </aside>
+
+  <script>
+    const battersData = [
+      {rank:1,name:"Rinku Singh",pBalls:333,pMetric:219.22,baseMetric:129.42,delta:89.80,bnd:35.1,score:67.96,fit:"Elite designated finisher. Bridges RR’s lower-middle order scoring demand when RRR exceeds 11.0.",pace:226.4,spin:211.7,dot:31.5,role:"Finisher"},
+      {rank:2,name:"Suryakumar Yadav",pBalls:148,pMetric:241.22,baseMetric:162.37,delta:78.85,bnd:39.9,score:65.75,fit:"Universal 360-degree aggressor. Neutralizes specialized death bowling with the highest boundary index.",pace:247.8,spin:232.6,dot:28.4,role:"Middle-order aggressor"},
+      {rank:3,name:"Tristan Stubbs",pBalls:266,pMetric:204.51,baseMetric:131.70,delta:72.82,bnd:29.7,score:62.06,fit:"High-volume middle-to-death accelerator and spin-rotator during collapse scenarios.",pace:213.8,spin:195.2,dot:33.0,role:"Finisher"},
+      {rank:4,name:"Marcus Stoinis",pBalls:160,pMetric:222.50,baseMetric:143.49,delta:79.01,bnd:33.8,score:61.89,fit:"Pace hitter providing boundary-clearance reliability under severe run-rate steepness.",pace:231.5,spin:207.4,dot:30.6,role:"Power all-rounder"},
+      {rank:5,name:"MS Dhoni",pBalls:248,pMetric:195.97,baseMetric:96.23,delta:99.74,bnd:29.4,score:60.67,fit:"Highest strike-rate delta (+99.74), demonstrating tactical match awareness in final overs.",pace:202.1,spin:187.4,dot:29.8,role:"Finisher / wicketkeeper"},
+      {rank:6,name:"Matthew Wade",pBalls:123,pMetric:181.30,baseMetric:120.20,delta:61.10,bnd:24.4,score:60.32,fit:"Wicketkeeping balance with pressure average of 74.33 and low dismissal risk in late chases.",pace:190.2,spin:169.5,dot:35.7,role:"Wicketkeeper-batter"},
+      {rank:7,name:"Rishabh Pant",pBalls:127,pMetric:211.81,baseMetric:135.28,delta:76.53,bnd:33.1,score:60.07,fit:"Dynamic left-hand option to disrupt standard field geometries in pressure chases.",pace:220.5,spin:199.1,dot:32.3,role:"Wicketkeeper-batter"},
+      {rank:8,name:"Tilak Varma",pBalls:293,pMetric:196.93,baseMetric:135.55,delta:61.38,bnd:27.3,score:58.08,fit:"Proven crisis anchor across 293 crunch deliveries; stabilizes before accelerating.",pace:205.6,spin:188.4,dot:34.1,role:"Middle-order anchor"},
+      {rank:9,name:"Dinesh Karthik",pBalls:227,pMetric:206.61,baseMetric:144.39,delta:62.22,bnd:32.6,score:56.67,fit:"Specialist death-phase executioner targeting boundary pockets with minimal dot-ball wastage.",pace:215.3,spin:199.8,dot:31.8,role:"Finisher / wicketkeeper"},
+      {rank:10,name:"Shashank Singh",pBalls:180,pMetric:186.67,baseMetric:149.74,delta:36.93,bnd:26.1,score:56.39,fit:"Composed lower-order match-winner sustaining pressure average of 42.00 in run chases.",pace:194.6,spin:178.3,dot:37.5,role:"Batting all-rounder"}
+    ];
+    const bowlersData = [
+      {rank:1,name:"Maheesh Theekshana",pBalls:183,pMetric:7.25,baseMetric:7.61,delta:.36,bnd:14.2,score:66.80,fit:"Defensive mystery spinner who chokes runs in high-pressure middle and death phases.",pace:7.42,spin:6.98,dot:43.7,role:"Mystery spinner"},
+      {rank:2,name:"Shaheen Afridi",pBalls:171,pMetric:6.95,baseMetric:7.81,delta:.86,bnd:13.5,score:66.78,fit:"Premier early-wicket breaker who restricts boundary leakage under extreme game stakes.",pace:6.62,spin:8.10,dot:39.8,role:"Left-arm quick"},
+      {rank:3,name:"Matheesha Pathirana",pBalls:300,pMetric:7.62,baseMetric:7.95,delta:.33,bnd:16.3,score:66.31,fit:"Highest-volume clutch death specialist using off-cutters and yorkers across 300 pressure balls.",pace:7.31,spin:8.02,dot:42.7,role:"Death specialist"},
+      {rank:4,name:"Taskin Ahmed",pBalls:125,pMetric:7.63,baseMetric:7.72,delta:.09,bnd:15.2,score:64.50,fit:"Hard-length enforcer with a 6.94 wicket strike rate in high-stress match phases.",pace:7.54,spin:8.66,dot:42.4,role:"Fast bowler"},
+      {rank:5,name:"Mustafizur Rahman",pBalls:287,pMetric:8.01,baseMetric:7.32,delta:-.69,bnd:16.4,score:60.95,fit:"Deceptive cutter variations and a proven pressure wicket-taking profile.",pace:7.88,spin:8.43,dot:40.4,role:"Left-arm death bowler"},
+      {rank:6,name:"Harshit Rana",pBalls:144,pMetric:8.29,baseMetric:9.47,delta:1.18,bnd:20.8,score:60.94,fit:"Strongest economy compression; thrives when defending totals and in playoff conditions.",pace:8.14,spin:9.20,dot:42.4,role:"Fast bowler"},
+      {rank:7,name:"Yuzvendra Chahal",pBalls:231,pMetric:8.23,baseMetric:8.38,delta:.15,bnd:14.7,score:59.06,fit:"Attacking wicket option under pressure, forcing mistimed boundary attempts.",pace:8.56,spin:7.98,dot:35.5,role:"Leg spinner"},
+      {rank:8,name:"Mohit Sharma",pBalls:163,pMetric:9.31,baseMetric:9.49,delta:.18,bnd:20.2,score:58.33,fit:"Back-of-hand slower-ball specialist with a strong pressure wicket frequency.",pace:9.02,spin:9.81,dot:36.8,role:"Death bowler"},
+      {rank:9,name:"Jacob Duffy",pBalls:151,pMetric:8.26,baseMetric:8.34,delta:.07,bnd:19.2,score:58.08,fit:"Disciplined seam bowler yielding 43.0% dots in pressure contexts.",pace:8.10,spin:9.16,dot:43.0,role:"Seam bowler"},
+      {rank:10,name:"Varun Chakravarthy",pBalls:209,pMetric:8.50,baseMetric:7.74,delta:-.76,bnd:19.6,score:58.01,fit:"High dot-ball generator capable of halting momentum during steep chases.",pace:8.72,spin:8.35,dot:45.0,role:"Mystery spinner"}
+    ];
+    let category="batters", mode="bar", chart=null, visibleData=[];
+    const $=id=>document.getElementById(id);
+    const initialsLabel = name => {
+      const parts=name.split(" ");
+      if(name==="MS Dhoni") return "MS Dhoni";
+      return parts.length>1 ? `${parts[0][0]}. ${parts.slice(1).join(" ")}` : name;
+    };
+    const fmt = (value, digits=2) => Number(value).toFixed(digits);
+    function currentData(){ return category==="batters"?battersData:bowlersData; }
+    function updateLabels(){
+      const batter=category==="batters";
+      $("table-title").textContent=`Top 10 ranked ${batter?"batters":"bowlers"} under pressure`;
+      $("th-pressure").textContent=batter?"Pressure SR":"Pressure Econ";
+      $("th-base").textContent=batter?"Base SR":"Base Econ";
+      $("chart-title").textContent=mode==="bar"?"Clutch delta elevation":"Pressure vs baseline quadrant";
+      $("chart-sub").textContent=batter?"Pressure strike rate vs baseline":"Lower economy is better for bowlers";
+    }
+    function renderTable(){
+      const query=$("search").value.trim().toLowerCase();
+      visibleData=currentData().filter(p=>p.name.toLowerCase().includes(query));
+      $("playerTableBody").innerHTML=visibleData.map(p=>`
+        <tr data-id="${p.rank}" class="group cursor-pointer transition hover:bg-pink-500/[.07]">
+          <td class="px-3 py-3"><span class="${p.rank===1?"rank-one bg-pink-600 text-white":"bg-slate-800 text-slate-400"} inline-flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold">#${p.rank}</span></td>
+          <td class="px-3 py-3"><div class="font-semibold text-white group-hover:text-pink-200">${p.name}</div><div class="text-[10px] text-slate-500">${p.role}</div></td>
+          <td class="mono px-3 py-3 text-slate-400">${p.pBalls}</td>
+          <td class="mono px-3 py-3 font-semibold text-white">${fmt(p.pMetric)}</td>
+          <td class="mono px-3 py-3 text-slate-400">${fmt(p.baseMetric)}</td>
+          <td class="mono px-3 py-3 font-bold ${p.delta>=0?"text-emerald-300":"text-amber-300"}">${p.delta>=0?"+":""}${fmt(p.delta)}</td>
+          <td class="mono px-3 py-3 text-slate-400">${fmt(p.bnd,1)}%</td>
+          <td class="mono px-3 py-3 text-right font-black text-pink-300">${fmt(p.score)}</td>
+        </tr>`).join("");
+      $("result-count").textContent=`${visibleData.length} of 10 players · click row to inspect`;
+      document.querySelectorAll("#playerTableBody tr").forEach(row=>row.addEventListener("click",()=>openDrawer(visibleData.find(p=>p.rank===Number(row.dataset.id)))));
+    }
+    function renderFit(){
+      $("rr-fit-content").innerHTML=currentData().slice(0,4).map(p=>`<button data-fit="${p.rank}" class="card rounded-xl p-4 text-left transition hover:-translate-y-0.5 hover:border-pink-500/50"><div class="flex items-center justify-between gap-2"><span class="text-sm font-bold text-white">#${p.rank} ${p.name}</span><span class="mono rounded bg-pink-500/10 px-2 py-1 text-[10px] font-bold text-pink-300">${fmt(p.score)} PUP</span></div><p class="mt-2 text-xs leading-relaxed text-slate-400">${p.fit}</p></button>`).join("");
+      document.querySelectorAll("[data-fit]").forEach(el=>el.addEventListener("click",()=>openDrawer(currentData().find(p=>p.rank===Number(el.dataset.fit)))));
+    }
+    function renderChart(){
+      if(chart) chart.destroy();
+      const data=currentData(), batter=category==="batters", ctx=$("rankingChart").getContext("2d");
+      const labels=data.map(p=>initialsLabel(p.name));
+      const common={responsive:true,maintainAspectRatio:false,animation:{duration:450},plugins:{legend:{labels:{color:"#94a3b8",boxWidth:10,font:{size:10}}},tooltip:{backgroundColor:"#0b0f19",borderColor:"#334155",borderWidth:1,titleColor:"#fff",bodyColor:"#cbd5e1"}},scales:{x:{ticks:{color:"#94a3b8",font:{size:9},maxRotation:30,minRotation:30},grid:{display:false}},y:{ticks:{color:"#94a3b8",font:{size:10}},grid:{color:"rgba(51,65,85,.35)"}}}};
+      if(mode==="bar"){
+        chart=new Chart(ctx,{type:"bar",data:{labels,datasets:[{label:batter?"Pressure SR":"Pressure Econ",data:data.map(p=>p.pMetric),backgroundColor:"#ec1687",borderRadius:5},{label:batter?"Baseline SR":"Baseline Econ",data:data.map(p=>p.baseMetric),backgroundColor:"#334155",borderRadius:5}]},options:{...common,scales:{...common.scales,x:{...common.scales.x,stacked:false},y:{...common.scales.y,beginAtZero:false}}}});
+        $("chart-insight").innerHTML=`<span class="font-bold text-pink-300">${batter?"Readout":"Readout"}:</span> ${data[0].name} leads the cohort with a <span class="mono text-white">${data[0].delta>=0?"+":""}${fmt(data[0].delta)} ${batter?"SR":"econ"} delta</span> under pressure. Pink bars are high-leverage outcomes; slate bars are baseline.`;
+      } else {
+        const parity={id:"parity",beforeDraw(c){const {ctx,chartArea}=c;if(!chartArea)return;const x=c.scales.x,y=c.scales.y,lo=Math.max(x.min,y.min),hi=Math.min(x.max,y.max);ctx.save();ctx.setLineDash([5,5]);ctx.strokeStyle="rgba(148,163,184,.45)";ctx.beginPath();ctx.moveTo(x.getPixelForValue(lo),y.getPixelForValue(lo));ctx.lineTo(x.getPixelForValue(hi),y.getPixelForValue(hi));ctx.stroke();ctx.restore();}};
+        chart=new Chart(ctx,{type:"scatter",plugins:[parity],data:{datasets:[{label:batter?"Players":"Players",data:data.map(p=>({x:p.baseMetric,y:p.pMetric,label:p.name})),backgroundColor:"#ec1687",borderColor:"#fb7ac0",pointRadius:6,pointHoverRadius:8}]},options:{...common,plugins:{...common.plugins,tooltip:{...common.plugins.tooltip,callbacks:{label:c=>`${c.raw.label}: baseline ${fmt(c.raw.x)} → pressure ${fmt(c.raw.y)}`}}},scales:{x:{...common.scales.x,title:{display:true,text:batter?"Baseline SR":"Baseline Econ",color:"#64748b"},beginAtZero:false},y:{...common.scales.y,title:{display:true,text:batter?"Pressure SR":"Pressure Econ",color:"#64748b"},beginAtZero:false}}}});
+        $("chart-insight").innerHTML=`<span class="font-bold text-pink-300">Quadrant guide:</span> ${batter?"Points above the diagonal outperform baseline; the top-left zone is the strongest clutch profile.":"Points below the diagonal concede less than baseline; the bottom-right zone is the strongest bowling profile."}`;
+      }
+    }
+    function openDrawer(p){
+      $("drawer-role").textContent=`${p.role} · ${category==="batters"?"Batter":"Bowler"}`;
+      $("drawer-name").textContent=p.name;
+      $("drawer-balls").textContent=`${p.pBalls} legal pressure balls · ${p.delta>=0?"+":""}${fmt(p.delta)} ${category==="batters"?"SR":"economy"} delta`;
+      $("drawer-score").querySelector("div:last-child").textContent=fmt(p.score);
+      const batter=category==="batters";
+      $("drawer-stats").innerHTML=batter?`
+        <div><div class="text-[10px] text-slate-500">Pressure SR</div><div class="mono mt-1 font-bold">${fmt(p.pMetric)}</div></div><div><div class="text-[10px] text-slate-500">Baseline SR</div><div class="mono mt-1 font-bold">${fmt(p.baseMetric)}</div></div>
+        <div><div class="text-[10px] text-slate-500">Pace SR</div><div class="mono mt-1 font-bold text-pink-300">${fmt(p.pace)}</div></div><div><div class="text-[10px] text-slate-500">Spin SR</div><div class="mono mt-1 font-bold text-sky-300">${fmt(p.spin)}</div></div>
+        <div><div class="text-[10px] text-slate-500">Boundary rate</div><div class="mono mt-1 font-bold">${fmt(p.bnd,1)}%</div></div><div><div class="text-[10px] text-slate-500">Dot-ball rate</div><div class="mono mt-1 font-bold">${fmt(p.dot,1)}%</div></div>`:`
+        <div><div class="text-[10px] text-slate-500">Pressure econ</div><div class="mono mt-1 font-bold">${fmt(p.pMetric)}</div></div><div><div class="text-[10px] text-slate-500">Baseline econ</div><div class="mono mt-1 font-bold">${fmt(p.baseMetric)}</div></div>
+        <div><div class="text-[10px] text-slate-500">Pace econ</div><div class="mono mt-1 font-bold text-pink-300">${fmt(p.pace)}</div></div><div><div class="text-[10px] text-slate-500">Spin econ</div><div class="mono mt-1 font-bold text-sky-300">${fmt(p.spin)}</div></div>
+        <div><div class="text-[10px] text-slate-500">Boundary leak</div><div class="mono mt-1 font-bold">${fmt(p.bnd,1)}%</div></div><div><div class="text-[10px] text-slate-500">Dot-ball rate</div><div class="mono mt-1 font-bold">${fmt(p.dot,1)}%</div></div>`;
+      $("drawer-verdict").textContent=p.fit;
+      $("drawer-backdrop").classList.add("open"); $("player-drawer").classList.add("open"); document.body.classList.add("overflow-hidden");
+    }
+    function closeDrawer(){ $("drawer-backdrop").classList.remove("open"); $("player-drawer").classList.remove("open"); document.body.classList.remove("overflow-hidden"); }
+    function switchCategory(next){ category=next; $("btn-batters").className=category==="batters"?"rounded-lg bg-pink-600 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-pink-900/30":"rounded-lg px-4 py-2 text-sm font-bold text-slate-400 hover:text-white"; $("btn-bowlers").className=category==="bowlers"?"rounded-lg bg-pink-600 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-pink-900/30":"rounded-lg px-4 py-2 text-sm font-bold text-slate-400 hover:text-white"; updateLabels(); renderTable(); renderFit(); renderChart(); }
+    function exportCsv(){const data=visibleData, headers=["Rank","Player","Pressure Balls","Pressure Metric","Baseline Metric","Delta","Boundary %","Composite Score"];const rows=data.map(p=>[p.rank,p.name,p.pBalls,p.pMetric,p.baseMetric,p.delta,p.bnd,p.score]);const csv=[headers,...rows].map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(",")).join("\n");const blob=new Blob([csv],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`rr-${category}-pressure-rankings.csv`;a.click();URL.revokeObjectURL(url);}
+    $("btn-batters").addEventListener("click",()=>switchCategory("batters")); $("btn-bowlers").addEventListener("click",()=>switchCategory("bowlers")); $("mode-bar").addEventListener("click",()=>{mode="bar";$("mode-bar").className="rounded-md bg-slate-700 px-3 py-1.5 text-xs font-semibold text-white";$("mode-scatter").className="rounded-md px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-white";updateLabels();renderChart();}); $("mode-scatter").addEventListener("click",()=>{mode="scatter";$("mode-scatter").className="rounded-md bg-slate-700 px-3 py-1.5 text-xs font-semibold text-white";$("mode-bar").className="rounded-md px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-white";updateLabels();renderChart();}); $("search").addEventListener("input",renderTable); $("export").addEventListener("click",exportCsv); $("close-drawer").addEventListener("click",closeDrawer); $("drawer-backdrop").addEventListener("click",closeDrawer); document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDrawer();});
+    updateLabels(); renderTable(); renderFit(); renderChart();
+  </script>
+</body>
+</html>
